@@ -1,0 +1,36 @@
+#/bin/bash
+
+_job_schedule(){
+
+    _job_generate #JOB_LIST
+
+
+    _apply_resoueces # &9
+
+
+    JOB_ID=0
+    for SP_JOB in ${JOB_LIST[*]};do
+        read -u 9
+
+        {
+            SP_JOB_CMD=${JOB_CMD_LIST[${JOB_ID}]}
+
+            _exec "${SP_JOB}" "${SP_JOB_CMD}"
+
+            echo >&9
+        } &
+
+        let JOB_ID+=1
+    done
+    wait
+
+
+    exec 9<&-
+
+    _log_info "All job of group[${JOB_GROUP}] were finished."
+
+}
+
+
+
+

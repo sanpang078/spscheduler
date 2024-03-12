@@ -1,0 +1,112 @@
+#!/bin/bash
+
+
+_args_parse(){
+    usage="
+    Usage:
+    -j, --job-group         Specify job group. By default,the script file name without suffix is used
+    -s, --script            Specify the script file to run.
+    -v, --var               Variables.
+    -n, --parallel-nums     Parallel nums.
+    -f, --var-file          Variable file.
+    -u, --sp_user           Specify the registered sp_user name.
+    -h, --help              Show the usage.
+    "
+
+    declare -gA SCRIPT_VARS # declare默认定义的是局部变量, -g定义全局变量
+
+    # 获取参数，判断合法性
+    while [[ $# -gt 0 ]];do
+        case "$1" in
+            -j|--job-group)
+                shift
+                JOB_GROUP="$1"
+                ;;
+            -s|--script)
+                shift
+                SCRIPT_FILE="$1"
+                ;;
+            -v|--var)
+                shift
+                IFS='='
+                read -ra kv <<< "$1"
+                IFS=' \t\n'
+                key="${kv[0]}"
+                value="${kv[1]}"
+                SCRIPT_VARS["$key"]="$value"
+                ;;
+            -n|--parallel-nums)
+                shift
+                PARALLEL_NUMS="$1"
+                ;;
+            -f|--var-file)
+                shift
+                VAR_FILE="$1"
+                ;;
+            -u|--sp_user)
+                shift
+                SP_USER="$1"
+                ;;
+            -h|--help)
+                echo "$usage"
+                exit 0
+                ;;
+            *)
+                echo "Invalid arguement: $1"
+                echo "$usage"
+                exit 1
+                ;;
+        esac
+
+        shift
+    done
+
+    # 必须指定脚本名和用户名
+    if [[ -z "$SCRIPT_FILE" || -z "$SP_USER" ]];then
+        echo "error: -s and -u must be specified. "
+        echo "$usage"
+        exit 1
+    fi
+
+    # 脚本必须是.sh文件且可执行
+
+    if [[ ! -x "$SCRIPT_FILE" || "${SCRIPT_FILE##*.}" != "sh" ]];then
+        echo "error: the script must be .sh file and be executable"
+        exit 1
+    fi
+
+    # 默认取不带后缀的脚本名作为作业名称
+    if [[ ! -n "$JOB_GROUP" ]];then 
+        sf=`basename "$SCRIPT_FILE"`
+        JOB_GROUP="${sf%.*}"
+    fi
+
+    # 如果指定了并行数PARALLEL_NUMS
+
+    if [[ -n "$PARALLEL_NUMS"  ]];then 
+        if [[ "$PARALLEL_NUMS" -lt 2 ]];then
+            echo "error: parallel nums must >= 2. " #PARALLEL_NUMS必须大于等于2
+            exit 1
+        elif [[ ! -n "$VAR_FILE" ]];then
+            echo "error: if a parallel number is specified, -f or --var-file must be specified"
+            exit 1
+        elif [[ ! -f "$VAR_FILE" ]];then
+            echo "error: file not exists"
+            exit 1
+        fi
+    fi
+
+    # 验证用户是否存在
+
+
+    # 获取日志目录
+    CURRENT_DATE=`date +'%Y-%m-%d'`
+    LOG_DIR="${SPSCHEDULER_HOME}/logs/${SP_USER}/${CURRENT_DATE}"
+    JOB_GROUP_LOG="${LOG_DIR}/${JOB_GROUP}"
+    DRIVER_LOG="${JOB_GROUP_LOG}/main.log"
+ 
+    mkdir -p "$JOB_GROUP_LOG"
+}
+
+
+

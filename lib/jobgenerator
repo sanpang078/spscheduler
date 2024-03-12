@@ -1,0 +1,59 @@
+#/bin/bash
+# 生成作业列表
+
+declare -a JOB_LIST
+
+_job_generate(){
+    
+    _log_info "Start generating the job list..." "${DRIVER_LOG}"
+
+    script_vars_values=("${SCRIPT_VARS[@]}")
+    
+    # 获取作业后缀
+    declare job_name_suffix
+
+    for value in "${script_vars_values[@]}";do
+        job_name_suffix+="${value}_"
+    done
+    job_name_suffix="${job_name_suffix%_}"
+
+    # 将作业写入作业列表
+    JOB_LIST[0]="${JOB_GROUP}_${job_name_suffix}"
+
+
+    # 以并行变量文件生成多个作业
+    if [[ -n ${VAR_FILE} ]];then
+        var_file_str=`cat "$VAR_FILE"`
+        cols=(`echo "$var_file_str" | sed -n '1p'`)
+        lines=`echo "$var_file_str" | sed -n '2,$p'`
+
+        lines_index=0
+        while read -r line;do
+            vals=("$line")
+            col_nums=${#cols[*]}
+
+            declare job_cmd            
+            job_cmd="${SCRIPT_FILE} ${vals[*]}"
+
+            
+            # 获取作业后缀
+            job_name_suffix=""
+
+            for value in ${vals[@]};do
+                job_name_suffix+="${value}_"
+            done
+            job_name_suffix="${job_name_suffix%_}"
+
+            # 将作业写入作业列表
+            job_name="${JOB_GROUP}_${job_name_suffix}"
+            JOB_LIST[${lines_index}]="${job_name}"
+            JOB_CMD_LIST[${lines_index}]="${job_cmd}"
+
+            let lines_index+=1
+
+        done <<< "$lines"
+    fi
+
+    _log_info " job list: ${JOB_LIST[*]}" "${DRIVER_LOG}"
+
+}

@@ -1,0 +1,43 @@
+#!/bin/bash
+
+
+
+_log_info(){
+    message="$1"
+    timestamp=`date +'%Y-%m-%d %H:%M:%S'`
+    echo "[$timestamp] INFO: $message"
+    if [[ $# -eq 2 ]];then 
+        echo "[$timestamp] INFO: $message" >> "$2"
+    elif [[ $# -eq 3 ]];then
+        echo "[$timestamp] INFO: $message" >> "$2"
+        echo "[$timestamp] INFO: $message" >> "$3"
+    fi
+}
+
+
+_log_warning(){
+    message="$1"
+    timestamp=`date +'%Y-%m-%d %H:%M:%S'`
+    echo "[$timestamp] WARNING: $message" 
+    if [[ $# -eq 2 ]];then 
+        echo "[$timestamp] WARNING: $message" >> "$2"
+    elif [[ $# -eq 3 ]];then
+        echo "[$timestamp] WARNING: $message" >> "$2"
+        echo "[$timestamp] WARNING: $message" >> "$3"
+    fi
+
+}
+
+
+_log_error(){
+    message="$1"
+    timestamp=`date +'%Y-%m-%d %H:%M:%S'`
+    echo "[$timestamp] ERROR: $message" 
+    if [[ $# -eq 2 ]];then 
+        echo "[$timestamp] ERROR: $message" >> "$2"
+    elif [[ $# -eq 3 ]];then
+        echo "[$timestamp] ERROR: $message" >> "$2"
+        echo "[$timestamp] ERROR: $message" >> "$3"
+    fi
+
+}

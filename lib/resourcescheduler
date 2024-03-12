@@ -1,0 +1,24 @@
+#/bin/bash
+_apply_resoueces(){
+
+    _log_info "Starting apply for resources..." "${DRIVER_LOG}"
+
+    
+    IFS=$'\n'
+    QUEUE=/tmp/$$_${RANDOM}_${RANDOM}.fifo
+
+    _log_info "Queue: $QUEUE" "${DRIVER_LOG}"
+    # 创建队列
+    mkfifo "$QUEUE"
+    exec 9<> "$QUEUE"
+
+
+    # 设置资源位
+    for ((i=0;i<$PARALLEL_NUMS;i++))
+    do
+        echo >&9
+    done
+
+    IFS=$' \t\n'
+
+}

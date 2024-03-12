@@ -1,0 +1,30 @@
+#!/bin/bash
+
+_exec(){
+    declare job_cmd="sh $2" 
+    declare job_log_file="${JOB_GROUP_LOG}/${SP_JOB}.log"
+
+    _log_info "Job:[${JOB_ID}] ${SP_JOB}: starting... " "${DRIVER_LOG}" "${job_log_file}"
+
+
+
+    _log_info "Job command: ${job_cmd}" "${job_log_file}"
+
+
+    _retry_exec "${job_cmd}" "${job_log_file}" 
+
+
+
+    if [[ $? -eq 0 ]];then
+        _log_info "Job:[${JOB_ID}] ${SP_JOB}: success " "${DRIVER_LOG}" "${job_log_file}"       
+
+    else
+        _log_error "Job:[${JOB_ID}] ${SP_JOB}: failed " "${DRIVER_LOG}" "${job_log_file}"       
+
+        return 1        
+    fi
+
+
+
+
+}

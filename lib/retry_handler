@@ -1,0 +1,42 @@
+#!/bin/bash
+MAX_RETRIES=3
+
+_retry_exec(){
+
+    job_cmd="$1"
+    job_log_file="$2"
+    retry_num=1
+
+    while true;do
+
+        if [[ `expr $RANDOM % 2` -eq 0 ]];then
+            sleep 2
+            $job_cmd  >> "${job_log_file}" 2>&1
+
+        else 
+            sleep 4
+            pwds   >> "${job_log_file}" 2>&1
+
+        fi
+
+
+
+        if [[ $? -eq 0 ]];then
+            return 0
+        else
+            _log_warning "Execution failed for the ${retry_num}th time." "${job_log_file}"
+
+            let retry_num+=1
+
+            if [[ ${retry_num} -gt ${MAX_RETRIES} ]];then
+                _log_warning "Maximum retry attempts reached."  "${job_log_file}"
+                return 1
+            else 
+                _log_warning "Starting retry attempt number ${retry_num}."   "${job_log_file}"
+            fi
+        fi
+
+    done
+
+
+}

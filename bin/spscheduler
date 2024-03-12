@@ -1,0 +1,17 @@
+#!/bin/bash
+# 导入各模块
+source $SPSCHEDULER_HOME/config/scheduler.conf
+
+source $SPSCHEDULER_HOME/lib/logger
+source $SPSCHEDULER_HOME/lib/util
+source $SPSCHEDULER_HOME/lib/jobgenerator
+source $SPSCHEDULER_HOME/lib/resourcescheduler
+source $SPSCHEDULER_HOME/lib/jobscheduler
+source $SPSCHEDULER_HOME/lib/retry_handler
+source $SPSCHEDULER_HOME/bin/jobexecutor
+
+
+# 调用参数解析的方法
+_args_parse "$@"
+
+_job_schedule
